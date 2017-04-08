@@ -95,4 +95,36 @@ describe('POST /todos', () => {
             .end(done);
         });
     });
+
+    describe('DELETE /todos/:id', () => {
+        it('Deberia eliminar un documento', (done) => {
+            var hexId = todos[1]._id.toHexString();
+
+            request(app)
+            .delete(`/todos/${hexId}`)
+            .expect(200)
+            .expect((res) => {
+                //console.log(res.body);
+                expect(res.body.doc._id).toBe(hexId);
+            })
+            .end((err, res) => {
+                if(err){
+                    return done(err);
+                }
+
+                Todo.findById(hexId).then((doc) => {
+                    expect(doc).toNotExist();
+                    done();
+                }).catch((err) => done(err));
+            });
+        })
+
+ /*    it('Deberia retornar 404 si no elimina un documento', (done) => {
+            
+        })
+
+        it('Deberia retornar 404 si el object id es invalido', (done) => {
+                        
+        }) */
+    });
 });
