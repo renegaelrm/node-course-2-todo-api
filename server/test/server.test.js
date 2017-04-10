@@ -162,7 +162,7 @@ describe('GET /users/me', () => {
                     expect(user).toExist();
                     expect(user.password).toNotBe(password);
                     done();
-                });
+                }).catch((err) => done(err));
             });
         });
 
@@ -187,5 +187,39 @@ describe('GET /users/me', () => {
             .expect(400)
             .end(done);
         });
+    });
+});
+
+describe('POST /users/login', () => {
+    it('Loguea a usuario y retorna token', (done) => {
+        request(app)
+        .post('/users/login')
+        .send({
+            email: users[1].email,
+            password: users[1].password
+        })
+        .expect(200)
+        .expect((res) => {
+            expect(res.headers['x-auth']).toExist();
+        })
+        .end((err, res) => {
+            if(err){
+                return done(err);
+            }            
+
+            User.findById(users[1]._id).then((user) => {   
+                expect(user.tokens[0]).toInclude({
+                    access: 'auth',
+                    token: res.headers['x-auth']
+                });
+                done();
+            }).catch((err) => {
+                done(err)
+            });
+        });
+    });
+
+    it('Rechaza login invalido', (done) => {
+
     });
 });
